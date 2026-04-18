@@ -2,4 +2,4 @@ requests
 python-telegram-bot 
 aiohttp 
 python-dotenv 
-google-genai
+
