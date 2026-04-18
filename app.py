@@ -15,20 +15,21 @@ from ai_outlook import get_ai_outlook
 
 load_dotenv()
 TOKEN = os.environ.get("BOT_TOKEN")
-RENDER_APP_URL = os.environ.get("RENDER_APP_URL", "https://your-app.onrender.com")
+RENDER_APP_URL = os.environ.get("RENDER_APP_URL", "https://skeleton-bullion-ai.onrender.com")
 
 # Enable logging
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
                     level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# ---------- Telegram Bot Handlers (Same as before) ----------
+# ---------- Telegram Bot Handlers ----------
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(
         "🏦 *Skeletron Bullion AI*\n\n"
         "Welcome to AI-powered gold intelligence.\n"
         "Commands:\n"
         "/gold - Get latest gold price & AI outlook\n"
+        "/about - About this bot\n"
         "/help - Show this message",
         parse_mode='Markdown'
     )
@@ -62,11 +63,27 @@ async def gold_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(message, parse_mode='Markdown')
 
 async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await update.message.reply_text("Commands:\n/gold - Gold price & AI outlook\n/start - Welcome message")
+    await update.message.reply_text(
+        "Commands:\n"
+        "/gold - Gold price & AI outlook\n"
+        "/about - About this bot\n"
+        "/start - Welcome message"
+    )
+
+async def about_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    await update.message.reply_text(
+        "🏦 *Skeletron Bullion AI*\n\n"
+        "AI-powered gold intelligence bot by *Skeletron Industries*.\n\n"
+        "🌐 Website: skeletronindustries.in\n"
+        "📧 Contact: Beskeletron@skeletronindustries.in\n"
+        "👤 Founder: Beskeletron\n\n"
+        "_Forging the Future of Industrial AI_",
+        parse_mode='Markdown'
+    )
 
 # ---------- Self-Ping to prevent sleep ----------
 async def self_ping():
-    await asyncio.sleep(30)  # Wait for server to start
+    await asyncio.sleep(30)
     while True:
         try:
             url = f"{RENDER_APP_URL}/health"
@@ -74,7 +91,7 @@ async def self_ping():
             logger.info("Self-ping sent")
         except Exception as e:
             logger.error(f"Self-ping failed: {e}")
-        await asyncio.sleep(600)  # 10 minutes
+        await asyncio.sleep(600)
 
 # ---------- Webhook Setup ----------
 async def setup_webhook(application):
@@ -95,18 +112,16 @@ async def telegram_webhook(request):
 
 # ---------- Main Application ----------
 if __name__ == "__main__":
-    # Create bot application
     application = Application.builder().token(TOKEN).build()
     application.add_handler(CommandHandler("start", start))
     application.add_handler(CommandHandler("help", help_command))
     application.add_handler(CommandHandler("gold", gold_command))
+    application.add_handler(CommandHandler("about", about_command))
 
-    # Create aiohttp web app
     web_app = web.Application()
     web_app.router.add_get("/health", health)
     web_app.router.add_post("/telegram", telegram_webhook)
 
-    # Startup tasks
     async def on_startup(app):
         await application.initialize()
         await setup_webhook(application)
@@ -120,6 +135,5 @@ if __name__ == "__main__":
     web_app.on_startup.append(on_startup)
     web_app.on_shutdown.append(on_shutdown)
 
-    # Run web server
     port = int(os.environ.get("PORT", 8080))
     web.run_app(web_app, host="0.0.0.0", port=port)
