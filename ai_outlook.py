@@ -1,2 +1,3 @@
 def get_ai_outlook(price):
-    return "AI outlook will return shortly. Quota exceeded, resetting soon."
+    # Temporary: Gemini quota exceeded, will restore soon.
+    return "AI outlook will return shortly. Quota reset pending."
